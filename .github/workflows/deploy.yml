@@ -124,12 +124,12 @@ jobs:
           
           # Step 8: EC2 pulls latest Docker image
           echo "📥 Pulling latest Docker image: $IMAGE_NAME"
-          docker pull $IMAGE_NAME
+          sudo docker pull $IMAGE_NAME
           
           # Step 9: Old container stopped
           echo "🛑 Stopping old container: $CONTAINER_NAME"
-          docker stop $CONTAINER_NAME 2>/dev/null || true
-          docker rm $CONTAINER_NAME 2>/dev/null || true
+          sudo docker stop $CONTAINER_NAME 2>/dev/null || true
+          sudo docker rm $CONTAINER_NAME 2>/dev/null || true
           
           # Create log directory for CloudWatch agent (if needed)
           
@@ -139,12 +139,12 @@ jobs:
           # Check if CloudWatch agent is installed, if not install it
           if ! command -v awslogs &> /dev/null; then
             echo "📦 Installing awslogs driver..."
-            docker plugin install --grant-all-permissions \
+            sudo docker plugin install --grant-all-permissions \
               docker/awslogs:latest || true
           fi
           
           # Run container with CloudWatch logging
-          docker run -d \
+          sudo docker run -d \
             --name $CONTAINER_NAME \
             --restart unless-stopped \
             -p 8000:8000 \
@@ -167,7 +167,7 @@ jobs:
           
           # Verify container is running
           echo "✅ Verifying container status..."
-          if docker ps | grep -q $CONTAINER_NAME; then
+          if sudo docker ps | grep -q $CONTAINER_NAME; then
             echo "✅ Container is running successfully!"
             echo ""
             echo "Container Details:"
@@ -191,7 +191,7 @@ jobs:
             
             echo ""
             echo "📊 To view logs, run:"
-            echo "   docker logs $CONTAINER_NAME"
+            echo "   sudo docker logs $CONTAINER_NAME"
             echo ""
             echo "☁️  To view CloudWatch logs:"
             echo "   aws logs tail /aws/ec2/container-insights --region $AWS_REGION"
@@ -203,18 +203,18 @@ jobs:
             echo "❌ Container failed to start!"
             echo ""
             echo "Container logs:"
-            docker logs $CONTAINER_NAME --tail 50
+            sudo docker logs $CONTAINER_NAME --tail 50
             exit 1
           fi
           
           # Clean up old images
           echo "🧹 Cleaning up old Docker images..."
-          docker image prune -f
+          sudo docker image prune -f
           
           # Show running containers
           echo ""
           echo "📋 Currently running containers:"
-          docker ps --filter "name=$CONTAINER_NAME"
+          sudo docker ps --filter "name=$CONTAINER_NAME"
     
     # Step 11: Verify deployment from GitHub side
     - name: Verify Deployment
