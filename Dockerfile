@@ -1,7 +1,7 @@
 # Dockerfile for Food Tray Recognition System
 # This containerizes your FastAPI application
 
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
