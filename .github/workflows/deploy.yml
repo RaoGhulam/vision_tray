@@ -135,15 +135,7 @@ jobs:
           
           # Step 10: New container started with CloudWatch logging
           echo "🚀 Starting new container with CloudWatch logging..."
-          
-          # Check if CloudWatch agent is installed, if not install it
-          if ! command -v awslogs &> /dev/null; then
-            echo "📦 Installing awslogs driver..."
-            sudo docker plugin install --grant-all-permissions \
-              docker/awslogs:latest || true
-          fi
-          
-          # Run container with CloudWatch logging
+
           sudo docker run -d \
             --name $CONTAINER_NAME \
             --restart unless-stopped \
@@ -153,68 +145,12 @@ jobs:
             --log-opt awslogs-group=$LOG_GROUP \
             --log-opt awslogs-stream=$LOG_STREAM \
             --log-opt awslogs-create-group=true \
-            --log-opt tag="fastapi-app" \
             -e SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
             -e SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
             -e HF_API_URL="${{ secrets.HF_API_URL }}" \
             -e AWS_REGION="$AWS_REGION" \
             -e ENVIRONMENT="production" \
             $IMAGE_NAME
-          
-          # Wait for container to be ready
-          echo "⏳ Waiting for container to be ready..."
-          sleep 5
-          
-          # Verify container is running
-          echo "✅ Verifying container status..."
-          if sudo docker ps | grep -q $CONTAINER_NAME; then
-            echo "✅ Container is running successfully!"
-            echo ""
-            echo "Container Details:"
-            echo "  Name: $CONTAINER_NAME"
-            echo "  Image: $IMAGE_NAME"
-            echo "  Ports: 8000:8000"
-            echo "  Log Driver: awslogs"
-            echo "  Log Group: $LOG_GROUP"
-            echo "  Log Stream: $LOG_STREAM"
-            echo "  Region: $AWS_REGION"
-            echo ""
-            
-            # Test health endpoint
-            echo "🔍 Testing health endpoint..."
-            HEALTH_CHECK=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/health)
-            if [ "$HEALTH_CHECK" == "200" ]; then
-              echo "✅ Health check passed! (HTTP $HEALTH_CHECK)"
-            else
-              echo "⚠️  Health check failed (HTTP $HEALTH_CHECK), but container is running"
-            fi
-            
-            echo ""
-            echo "📊 To view logs, run:"
-            echo "   sudo docker logs $CONTAINER_NAME"
-            echo ""
-            echo "☁️  To view CloudWatch logs:"
-            echo "   aws logs tail /aws/ec2/container-insights --region $AWS_REGION"
-            echo ""
-            echo "=========================================="
-            echo "✅ Deployment completed successfully!"
-            echo "=========================================="
-          else
-            echo "❌ Container failed to start!"
-            echo ""
-            echo "Container logs:"
-            sudo docker logs $CONTAINER_NAME --tail 50
-            exit 1
-          fi
-          
-          # Clean up old images
-          echo "🧹 Cleaning up old Docker images..."
-          sudo docker image prune -f
-          
-          # Show running containers
-          echo ""
-          echo "📋 Currently running containers:"
-          sudo docker ps --filter "name=$CONTAINER_NAME"
     
     # Step 11: Verify deployment from GitHub side
     - name: Verify Deployment
@@ -233,7 +169,7 @@ jobs:
           fi
           RETRY_COUNT=$((RETRY_COUNT+1))
           echo "⏳ Waiting for API to be ready... (Attempt $RETRY_COUNT/$MAX_RETRIES)"
-          sleep 5
+          sleep 15
         done
         echo "❌ Deployment verification failed. API not responding."
         exit 1
