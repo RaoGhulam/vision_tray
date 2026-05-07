@@ -136,6 +136,10 @@ jobs:
           # Step 10: New container started with CloudWatch logging
           echo "🚀 Starting new container with CloudWatch logging..."
 
+          echo "IMAGE=$IMAGE_NAME"
+          echo "GROUP=$LOG_GROUP"
+          echo "STREAM=$LOG_STREAM"
+          
           sudo docker run -d \
             --name $CONTAINER_NAME \
             --restart unless-stopped \
