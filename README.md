@@ -1,5 +1,7 @@
 # Vision Tray
 
+![UI](demo_image.png)
+
 Vision Tray is a fully responsive web application that automates food tray billing using computer vision.
 
 Users can capture or upload an image of their food tray, and the system automatically detects food items, calculates quantities, and generates a bill in real time.
@@ -109,6 +111,33 @@ Total = Item Price × Quantity
 ```
 
 The final invoice is generated and displayed to the user.
+
+---
+
+## Machine Learning Model
+
+### Model
+YOLOv8-m
+
+### Deployment
+Hosted on Hugging Face Spaces
+
+### Dataset
+
+The custom object detection model was trained on a curated food tray dataset consisting of:
+
+- **495 training images**
+- **55 validation images**
+
+### Custom Training Classes
+
+- Pizza
+- Burger
+- Sandwich
+- Fries
+- Chicken
+
+The dataset was specifically prepared for cafeteria-style food tray detection to improve performance in practical food billing scenarios.
 
 ---
 
